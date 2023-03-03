@@ -1,0 +1,48 @@
+Sub Loop_through_all_chart_points_and_change_color()
+
+Dim myChartObject As ChartObject
+Dim mySrs As Series
+Dim myPts As Points
+Dim i As Integer
+Dim cellColor As Long
+
+Dim YSrsAddress As String
+Dim PtAddress As String
+Dim YSrsRng As Range
+Dim PtRng As Range
+                    
+With ActiveSheet
+    For Each myChartObject In .ChartObjects
+        For Each mySrs In myChartObject.Chart.SeriesCollection
+            ' Get data series
+            YSrsAddress = Split(mySrs.Formula, ",")(2)
+            Set YSrsRng = Range(YSrsAddress)
+            
+            Set myPts = mySrs.Points
+            For i = 1 To myPts.Count
+                ' Get cell address of chart point
+                Set PtRng = YSrsRng.Cells(i)
+                PtAddress = PtRng.Address(0, 0, xlA1, xlExternal)
+                ' Get cell colour
+                cellColor = .Range(PtAddress).Interior.Color
+                If cellColor = RGB(255, 255, 255) Then
+                    ' If selcellColor is white make chart point invisible
+                    myPts(i).Format.Fill.Visible = msoFalse
+                    ' Remove data label
+                    myPts(i).DataLabel.ShowValue = 0
+                Else
+                    With myPts(i).Format.Fill
+                        .Visible = msoTrue
+                        .ForeColor.RGB = cellColor
+                        .Transparency = 0
+                        .Solid
+                    End With
+                    ' Add data label
+                    myPts(i).DataLabel.ShowValue = 1
+                End If
+            Next
+        Next
+    Next
+End With
+
+End Sub
